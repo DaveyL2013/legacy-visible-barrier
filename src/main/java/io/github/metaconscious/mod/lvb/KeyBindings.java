@@ -1,10 +1,10 @@
 package io.github.metaconscious.mod.lvb;
 
-import net.legacyfabric.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.legacyfabric.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.options.KeyBinding;
 import net.minecraft.text.TranslatableText;
+import net.ornithemc.osl.keybinds.api.KeyBindingEvents;
+import net.ornithemc.osl.lifecycle.api.client.MinecraftClientEvents;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.input.Keyboard;
@@ -25,18 +25,20 @@ public final class KeyBindings {
     private final VisibilityController controller = new VisibilityController();
 
     public void init() {
-        KeyBindingHelper.registerKeyBinding(barrierVisibilityTogglingKey);
-        LOGGER.info("Key binding registered.");
-        ClientTickEvents.END_CLIENT_TICK.register(this::onBarrierVisibilityToggled);
-        LOGGER.info("Keypress event listener registered.");
+        KeyBindingEvents.REGISTER_KEYBINDS.register(registry -> {
+            KeyBinding barrierVisibilityTogglingKey = registry.register(this.barrierVisibilityTogglingKey);
+            LOGGER.info(LegacyVisibleBarrierMod.MOD_ID + " key binding registered.");
+        });
+        MinecraftClientEvents.TICK_END.register(this::onBarrierVisibilityToggled);
+        LOGGER.info(LegacyVisibleBarrierMod.MOD_ID + " keypress event listener registered.");
     }
 
     public Visibility getVisibilityViewer() {
         return controller;
     }
 
-    private void onBarrierVisibilityToggled(MinecraftClient minecraftClient) {
-        while (barrierVisibilityTogglingKey.wasPressed()) {
+    private void onBarrierVisibilityToggled(Minecraft minecraftClient) {
+        while (barrierVisibilityTogglingKey.consumeClick()) {
             boolean visibleNow = controller.toggle();
             if (visibleNow) {
                 minecraftClient.player.sendMessage(TO_VISIBLE);
@@ -44,7 +46,7 @@ public final class KeyBindings {
                 minecraftClient.player.sendMessage(TO_INVISIBLE);
             }
             minecraftClient.worldRenderer.reload();
-            LOGGER.debug("The visibility of barriers is '{}' now.", visibleNow ? "visible" : "invisible");
+            LOGGER.debug("Barriers should now be '{}'.", visibleNow ? "visible" : "invisible");
         }
     }
 

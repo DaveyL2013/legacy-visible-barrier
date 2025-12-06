@@ -8,7 +8,7 @@
   "client": [
     "BarrierBlockMixin",
     "BarrierParticleMixin",
-    "BlockStateMapperMixin"
+    "BlockModelsMixin"
   ],
   "injectors": {
     "defaultRequire": 1

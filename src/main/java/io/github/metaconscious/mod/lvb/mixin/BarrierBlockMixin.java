@@ -6,10 +6,10 @@ import net.fabricmc.api.Environment;
 import net.minecraft.block.BarrierBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.block.BlockLayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.BlockView;
+import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -27,7 +27,7 @@ public class BarrierBlockMixin extends Block {
      */
     @Overwrite
     @Override
-    public int getBlockType() {
+    public int getRenderType() {
         return LegacyVisibleBarrierMod.getInstance().getKeyBindings().getVisibilityViewer().isVisible()
                 ? 3
                 : -1;
@@ -35,13 +35,13 @@ public class BarrierBlockMixin extends Block {
 
     @Environment(EnvType.CLIENT)
     @Override
-    public RenderLayer getRenderLayerType() {
-        return RenderLayer.TRANSLUCENT;
+    public BlockLayer getRenderLayer() {
+        return BlockLayer.TRANSLUCENT;
     }
 
     @Environment(EnvType.CLIENT)
     @Override
-    public boolean isSideInvisible(@NotNull BlockView view, BlockPos pos, Direction facing) {
+    public boolean shouldRenderFace(@NotNull WorldView view, BlockPos pos, Direction facing) {
         return view.getBlockState(pos).getBlock() != this;
     }
 }
